@@ -26,6 +26,110 @@
  - 발표 준비 : 2026.03.11 ~ 2026.03.12
  - 프로젝트 발표 : 2026.03.13
 
+ - ## 기술 스택
+| 구분 | 기술 |
+|------|------|
+| Frontend | Vue 3, Vue Router, Pinia, Axios, Material Dashboard 2 |
+| Backend | Node.js, Express 5 |
+| Database | MariaDB / MySQL |
+| 아키텍처 | routes → controller → service |
+
+---
+
+## 담당 업무 : [본인 이름]
+
+### 1. 설문지 양식 관리
+관리자(a4)가 지원 신청서의 **질문 구조를 버전별로 설계·등록·관리**하는 기능
+
+**주요 기능**
+- 양식 목록 조회 (버전명, 작성일, 사용 시작/종료일, 코멘트, 사용 여부)
+- 신규 양식 작성 (대분류 → 소분류 → 질문 계층 구조)
+- 기존 버전 불러와 수정 후 새 버전으로 등록
+- 특정 버전 **사용 등록** (기존 사용 중 양식은 자동 종료)
+
+**응답 타입**
+| 코드 | 유형 |
+|------|------|
+| l1 | 자유 응답형 |
+| l2 | 2지선다형 |
+| l3 | 5지선다형 |
+
+**관련 경로**
+| 구분 | 경로 |
+|------|------|
+| Frontend | `/form`, `/form/write`, `/form/view/:num` |
+| Backend API | `GET /api/form/list`, `POST /api/form/write`, `GET /api/form/getForm/:num`, `PATCH /api/form/usage/:ver` |
+
+**주요 파일**
+- `frontend/src/views/form/formList.vue` — 양식 목록
+- `frontend/src/views/form/formWrite.vue` — 양식 작성
+- `frontend/src/views/form/formView.vue` — 양식 상세·사용 등록
+- `backend/controllers/form_controller.js`
+- `backend/services/form_service.js`
+
+**DB 테이블**
+`form_version` → `bigcategory` → `smallcategory` → `question` → `examples`
+
+---
+
+### 2. 설문지 작성 · 조회
+보호자/일반 회원이 **현재 사용 중인 양식**으로 지원 신청서를 작성하고, 권한에 따라 목록·상세를 조회하는 기능
+
+**작성 (`/document/write`)**
+- 로그인 사용자의 지원자 목록에서 대상 선택
+- `GET /api/form/usageForm`으로 **현재 사용 중(h1)** 양식 로드
+- 대분류/소분류/질문별 응답 입력 후 제출
+- `POST /api/document/write`로 저장 (지원자, 작성자, 양식 버전, 응답 포함)
+
+**조회 (`/document`)**
+- 권한·센터·검색 조건(작성자, 담당자, 지원자)에 따른 신청서 목록
+- 모달에서 지원신청서 응답 상세 조회
+- 지원계획서·지원결과서 연동 조회
+
+**관련 경로**
+| 구분 | 경로 |
+|------|------|
+| Frontend | `/document`, `/document/write` |
+| Backend API | `GET /api/document/list`, `POST /api/document/write`, `GET /api/document/getResp/:num` |
+
+**주요 파일**
+- `frontend/src/views/document/write_document.vue` — 설문 작성
+- `frontend/src/views/list/documentLIST.vue` — 설문 목록·조회
+- `backend/controllers/document_controller.js`
+- `backend/services/document_service.js`
+
+---
+
+### 3. 담당자 관리
+지원자·신청서에 **기관 담당자를 배정·변경**하는 기능
+
+#### 3-1. 지원자 담당자 배정 (`/support/allotment`)
+- 미배정 지원자 목록 조회
+- 동일 센터 기관 담당자 목록 조회 (`GET /api/user/getManager/:id`)
+- 담당자 선택 후 배정 (`POST /api/support/assign`)
+
+#### 3-2. 신청서 담당자 지정 (`/work/representative`)
+- 신청서 작성자 센터의 담당자·관리자 목록 조회
+- 신청서별 담당자 등록·변경 (`PATCH /api/document/manager/:doc_num/:manager_id`)
+- 담당자 지정 시 우선순위 상태 자동 갱신
+
+**관련 경로**
+| 구분 | 경로 |
+|------|------|
+| Frontend | `/support/allotment`, `/work/representative` |
+| Backend API | `POST /api/support/assign`, `PATCH /api/document/manager/:doc_num/:manager_id`, `GET /api/user/getManager/:id` |
+
+**주요 파일**
+- `frontend/src/views/list/requestList.vue` — 지원자 담당자 배정
+- `frontend/src/views/work/representative.vue` — 신청서 담당자 지정
+- `backend/controllers/support_controller.js`
+- `backend/services/support_service.js`
+
+---
+
+### 담당 기능 흐름도
+
+
 ## 커밋 메시지 형식
  - (이름 / yyyyMMdd / 작업내용 )
  - EX) 홍길동 / 202X0XXX / README.md 작성
